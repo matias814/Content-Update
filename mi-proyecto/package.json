@@ -1,0 +1,18 @@
+{
+  "name": "intercom-campaign-sync",
+  "version": "1.0.0",
+  "description": "Syncs campaign deadline dates from Intercom internal articles into a single summary article",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "sync": "node -e \"require('./sync')().catch(err => { console.error(err.message); process.exit(1); })\""
+  },
+  "dependencies": {
+    "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
+    "node-cron": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
