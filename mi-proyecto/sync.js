@@ -130,14 +130,16 @@ const EMOJI_RE = /[\p{Emoji_Presentation}\p{Extended_Pictographic}\u{FE0F}\u{200
 
 function extractName(title) {
   const lastDash = title.lastIndexOf(' - ');
-  if (lastDash === -1) return title.trim();
+  let name = title.trim();
 
-  const suffix = title.slice(lastDash + 3).trim();
-  const looksLikeDate =
-    /^\d{4}-\d{2}-\d{2}$/.test(suffix) ||
-    /^\d{1,2}\/\d{1,2}(\/\d{2,4})?$/.test(suffix);
+  if (lastDash !== -1) {
+    const suffix = title.slice(lastDash + 3).trim();
+    const looksLikeDate =
+      /^\d{4}-\d{2}-\d{2}$/.test(suffix) ||
+      /^\d{1,2}\/\d{1,2}(\/\d{2,4})?$/.test(suffix);
+    if (looksLikeDate) name = title.slice(0, lastDash).trim();
+  }
 
-  const name = looksLikeDate ? title.slice(0, lastDash).trim() : title.trim();
   return name.replace(EMOJI_RE, '').replace(/\s+/g, ' ').trim();
 }
 
