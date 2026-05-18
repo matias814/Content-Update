@@ -119,7 +119,11 @@ function parseDeadline(title) {
 // Campaign name  (everything before the trailing " - <date>" suffix)
 // ---------------------------------------------------------------------------
 
-const EMOJI_RE = /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu;
+// Matches emoji codepoints plus the invisible glue characters used in
+// multi-codepoint sequences: ZWJ (U+200D), variation selector-16 (U+FE0F),
+// and combining enclosing keycap (U+20E3). Without these, characters like
+// 🧚‍♀️ or ☁️ leave behind invisible residue that appears as stray characters.
+const EMOJI_RE = /[\p{Emoji_Presentation}\p{Extended_Pictographic}\u{FE0F}\u{200D}\u{20E3}]/gu;
 
 function extractName(title) {
   const lastDash = title.lastIndexOf(' - ');
@@ -131,7 +135,7 @@ function extractName(title) {
     /^\d{1,2}\/\d{1,2}(\/\d{2,4})?$/.test(suffix);
 
   const name = looksLikeDate ? title.slice(0, lastDash).trim() : title.trim();
-  return name.replace(EMOJI_RE, '').trim();
+  return name.replace(EMOJI_RE, '').replace(/\s+/g, ' ').trim();
 }
 
 // ---------------------------------------------------------------------------
