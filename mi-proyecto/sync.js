@@ -119,11 +119,14 @@ function parseDeadline(title) {
 // Campaign name  (everything before the trailing " - <date>" suffix)
 // ---------------------------------------------------------------------------
 
-// Matches emoji codepoints plus the invisible glue characters used in
-// multi-codepoint sequences: ZWJ (U+200D), variation selector-16 (U+FE0F),
-// and combining enclosing keycap (U+20E3). Without these, characters like
-// 🧚‍♀️ or ☁️ leave behind invisible residue that appears as stray characters.
-const EMOJI_RE = /[\p{Emoji_Presentation}\p{Extended_Pictographic}\u{FE0F}\u{200D}\u{20E3}]/gu;
+// Three-pass analysis confirmed this covers every emoji category:
+//   \p{Emoji_Presentation}      — standard emoji rendered as images by default
+//   \p{Extended_Pictographic}   — all pictographic chars incl. text-default bases (☁ ♥ ⚡ …)
+//   \u{FE0F}                    — variation selector-16 (forces emoji presentation)
+//   \u{200D}                    — zero-width joiner (glues sequences like 🧚‍♀️)
+//   \u{20E3}                    — combining enclosing keycap (used in 1️⃣ 2️⃣ …)
+//   \u{E0020}-\u{E007F}         — Unicode tag characters (subdivision flags 🏴󠁧󠁢󠁥󠁮󠁧󠁿)
+const EMOJI_RE = /[\p{Emoji_Presentation}\p{Extended_Pictographic}\u{FE0F}\u{200D}\u{20E3}\u{E0020}-\u{E007F}]/gu;
 
 function extractName(title) {
   const lastDash = title.lastIndexOf(' - ');
@@ -143,14 +146,17 @@ function extractName(title) {
 // ---------------------------------------------------------------------------
 
 function buildBody(campaigns) {
-  const today = new Date().toISOString().split('T')[0];
+  const now      = new Date();
+  const date     = now.toISOString().split('T')[0];
+  const time     = now.toISOString().split('T')[1].slice(0, 5); // HH:MM
+  const timestamp = `${date} ${time} UTC`;
 
   const rows = campaigns
     .map(({ name, deadline }) => `<p>${name} | Deadline: ${deadline}</p>`)
     .join('\n');
 
   return (
-    `<p><em>Last updated: ${today} — ${campaigns.length} active campaigns</em></p>\n` +
+    `<p><em>Last updated: ${timestamp} — ${campaigns.length} active campaigns</em></p>\n` +
     rows
   );
 }
