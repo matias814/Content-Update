@@ -128,24 +128,21 @@ function parseDeadline(title) {
 //   \u{E0020}-\u{E007F}         — Unicode tag characters (subdivision flags 🏴󠁧󠁢󠁥󠁮󠁧󠁿)
 const EMOJI_RE = /[\p{Emoji_Presentation}\p{Extended_Pictographic}\u{FE0F}\u{200D}\u{20E3}\u{E0020}-\u{E007F}]/gu;
 
-// Matches " - M/D - ", " - MM/DD - ", " - MM/DD/YY - " in the middle of a title
-const INLINE_DATE_RE = / - \d{1,2}\/\d{1,2}(?:\/\d{2,4})? - /g;
+// Handles every spacing variant seen in real titles:
+//   " - 5/19 - "  "- 2/24- "  " -3/3-"  "-3/10-"  "- 4/7 - "  etc.
+const INLINE_DATE_RE = /\s*-\s*\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\s*-\s*/g;
+
+// Trailing date with any spacing: " - 05/26", "-2026-06-02", " -5/5" at end of string
+const TRAILING_DATE_RE = /\s*-\s*(?:\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}(?:\/\d{2,4})?)\s*$/;
 
 function extractName(title) {
-  // Remove inline date segments (e.g. "Brand - 5/19 - Description" → "Brand - Description")
-  let name = title.replace(INLINE_DATE_RE, ' - ');
-
-  // Remove trailing " - DATE" (e.g. "Brand - 05/26" or "Brand - 2026-06-02")
-  const lastDash = name.lastIndexOf(' - ');
-  if (lastDash !== -1) {
-    const suffix = name.slice(lastDash + 3).trim();
-    const looksLikeDate =
-      /^\d{4}-\d{2}-\d{2}$/.test(suffix) ||
-      /^\d{1,2}\/\d{1,2}(\/\d{2,4})?$/.test(suffix);
-    if (looksLikeDate) name = name.slice(0, lastDash);
-  }
-
-  return name.replace(EMOJI_RE, '').replace(/\s+/g, ' ').trim();
+  const name = title
+    .replace(INLINE_DATE_RE, ' - ')   // "Brand -5/19- Desc"  →  "Brand - Desc"
+    .replace(TRAILING_DATE_RE, '')     // "Brand - 05/26"      →  "Brand"
+    .replace(EMOJI_RE, '')             // strip all emoji
+    .replace(/\s+/g, ' ')             // collapse whitespace
+    .trim();
+  return name;
 }
 
 // ---------------------------------------------------------------------------
