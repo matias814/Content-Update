@@ -129,17 +129,8 @@ function parseDeadline(title) {
 const EMOJI_RE = /[\p{Emoji_Presentation}\p{Extended_Pictographic}\u{FE0F}\u{200D}\u{20E3}\u{E0020}-\u{E007F}]/gu;
 
 function extractName(title) {
-  const lastDash = title.lastIndexOf(' - ');
-  let name = title.trim();
-
-  if (lastDash !== -1) {
-    const suffix = title.slice(lastDash + 3).trim();
-    const looksLikeDate =
-      /^\d{4}-\d{2}-\d{2}$/.test(suffix) ||
-      /^\d{1,2}\/\d{1,2}(\/\d{2,4})?$/.test(suffix);
-    if (looksLikeDate) name = title.slice(0, lastDash).trim();
-  }
-
+  const firstDash = title.indexOf(' - ');
+  const name = firstDash !== -1 ? title.slice(0, firstDash) : title;
   return name.replace(EMOJI_RE, '').replace(/\s+/g, ' ').trim();
 }
 
