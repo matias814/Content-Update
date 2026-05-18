@@ -119,6 +119,8 @@ function parseDeadline(title) {
 // Campaign name  (everything before the trailing " - <date>" suffix)
 // ---------------------------------------------------------------------------
 
+const EMOJI_RE = /[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu;
+
 function extractName(title) {
   const lastDash = title.lastIndexOf(' - ');
   if (lastDash === -1) return title.trim();
@@ -128,7 +130,8 @@ function extractName(title) {
     /^\d{4}-\d{2}-\d{2}$/.test(suffix) ||
     /^\d{1,2}\/\d{1,2}(\/\d{2,4})?$/.test(suffix);
 
-  return looksLikeDate ? title.slice(0, lastDash).trim() : title.trim();
+  const name = looksLikeDate ? title.slice(0, lastDash).trim() : title.trim();
+  return name.replace(EMOJI_RE, '').trim();
 }
 
 // ---------------------------------------------------------------------------
