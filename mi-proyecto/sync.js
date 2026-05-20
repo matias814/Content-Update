@@ -220,7 +220,11 @@ async function sync() {
     const deadline = parseDeadline(title);
     if (!deadline) { skipped++; continue; }
 
-    campaigns.push({ name: extractName(title), deadline });
+    const cleanedTitle = title
+      .replace(INLINE_DATE_RE, ' - ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    campaigns.push({ name: cleanedTitle, deadline });
   }
 
   // Sort: soonest deadline first
