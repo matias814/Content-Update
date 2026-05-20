@@ -4,6 +4,7 @@ require('dotenv').config();
 const axios = require('axios');
 
 const SUMMARY_TITLE = 'Campaign deadline dates';
+const OWNER_ID      = 8022814;
 const BASE_URL = 'https://api.intercom.io';
 const INTERCOM_VERSION = '2.14';
 
@@ -179,6 +180,7 @@ async function createArticle(body, authorId) {
     title:     SUMMARY_TITLE,
     body,
     author_id: authorId,
+    owner_id:  OWNER_ID,
     state:     'published',
   });
   return data;
@@ -186,9 +188,10 @@ async function createArticle(body, authorId) {
 
 async function updateArticle(id, body) {
   const { data } = await api.put(`/internal_articles/${id}`, {
-    title: SUMMARY_TITLE,
+    title:    SUMMARY_TITLE,
     body,
-    state: 'published',
+    owner_id: OWNER_ID,
+    state:    'published',
   });
   return data;
 }
